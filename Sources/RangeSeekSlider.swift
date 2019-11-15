@@ -208,6 +208,29 @@ import UIKit
             updateLabelPositions()
         }
     }
+    
+    public func setSliderLineGradient(gradient: CAGradientLayer) {
+        
+        sliderLine.colors = gradient.colors
+        sliderLine.startPoint = gradient.startPoint
+        sliderLine.endPoint = gradient.endPoint
+        sliderLine.frame = bounds
+    }
+    
+    public func setSliderLineBetweenHandlesGradient(gradient: CAGradientLayer) {
+        
+        sliderLineBetweenHandles.colors = gradient.colors
+        sliderLineBetweenHandles.startPoint = gradient.startPoint
+        sliderLineBetweenHandles.endPoint = gradient.endPoint
+        sliderLineBetweenHandles.frame = bounds
+    }
+    
+    public func setRTL() {
+        transform = CGAffineTransform(scaleX: -1, y: 1)
+        sliderLine.transform = CATransform3DScale(CATransform3DMakeRotation(0, 0, 0, 0),-1, 1, 1)
+        sliderLineBetweenHandles.transform = CATransform3DScale(CATransform3DMakeRotation(0, 0, 0, 0),-1, 1, 1)
+    }
+
 
     /// The label displayed in accessibility mode for minimum value handler. If not set, the default is empty String.
     @IBInspectable open var minLabelAccessibilityLabel: String?
@@ -227,8 +250,8 @@ import UIKit
     private enum HandleTracking { case none, left, right }
     private var handleTracking: HandleTracking = .none
 
-    private let sliderLine: CALayer = CALayer()
-    private let sliderLineBetweenHandles: CALayer = CALayer()
+    private let sliderLine: CAGradientLayer = CAGradientLayer()
+    private let sliderLineBetweenHandles: CAGradientLayer = CAGradientLayer()
 
     private let leftHandle: CALayer = CALayer()
     private let rightHandle: CALayer = CALayer()
@@ -399,11 +422,21 @@ import UIKit
         // draw the minimum slider handle
         leftHandle.cornerRadius = handleDiameter / 2.0
         leftHandle.borderWidth = handleBorderWidth
+        leftHandle.shadowRadius = 1.5
+        leftHandle.shadowOpacity = 0.25
+        leftHandle.shadowOffset = CGSize(width: 0, height: 3)
+        leftHandle.shadowColor = UIColor.black.cgColor
+        leftHandle.masksToBounds = false
         layer.addSublayer(leftHandle)
 
         // draw the maximum slider handle
         rightHandle.cornerRadius = handleDiameter / 2.0
         rightHandle.borderWidth = handleBorderWidth
+        rightHandle.shadowRadius = 1.5
+        rightHandle.shadowOpacity = 0.25
+        rightHandle.shadowOffset = CGSize(width: 0, height: 3)
+        rightHandle.shadowColor = UIColor.black.cgColor
+        rightHandle.masksToBounds = false
         layer.addSublayer(rightHandle)
 
         let handleFrame: CGRect = CGRect(x: 0.0, y: 0.0, width: handleDiameter, height: handleDiameter)
@@ -689,15 +722,10 @@ import UIKit
             transform = CATransform3DIdentity
         }
 
-        CATransaction.begin()
-        CATransaction.setAnimationDuration(0.3)
-        CATransaction.setAnimationTimingFunction(CAMediaTimingFunction(name: CAMediaTimingFunctionName.easeInEaseOut))
         handle.transform = transform
 
-        // the label above the handle will need to move too if the handle changes size
+            // the label above the handle will need to move too if the handle changes size
         updateLabelPositions()
-
-        CATransaction.commit()
     }
 }
 

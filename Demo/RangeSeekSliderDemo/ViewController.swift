@@ -54,6 +54,59 @@ final class ViewController: UIViewController {
         rangeSliderCustom.lineHeight = 10.0
         rangeSliderCustom.numberFormatter.positivePrefix = "$"
         rangeSliderCustom.numberFormatter.positiveSuffix = "M"
+        
+        let gradient = generate(colors: [UIColor(red: 0.99, green: 0.61, blue: 0.25, alpha: 1), UIColor(red: 1, green: 0.3, blue: 0.63, alpha: 1)])
+        rangeSliderCustom.setSliderLineBetweenHandlesGradient(gradient: gradient)
+        
+    }
+    
+    private func generate(colors: [UIColor], orientation: GradientOrientation = .topLeftBottomRight, locations: [NSNumber]? = nil) -> CAGradientLayer {
+           let layer = CAGradientLayer()
+
+           layer.colors = colors.map { $0.cgColor }
+           layer.startPoint = orientation.startPoint
+           layer.endPoint = orientation.endPoint
+           layer.locations = locations // the locations array should contain the same number of items as the colors array.
+
+           return layer
+       }
+}
+enum GradientOrientation {
+    case topRightBottomLeft
+    case topLeftBottomRight
+    case bottomRightTopLeft
+    case bottomLeftTopRight
+    case horizontal
+    case verticalUp
+    case verticalDown
+
+    var startPoint: CGPoint {
+        get { return self.points.startPoint }
+    }
+
+    var endPoint: CGPoint {
+        get { return self.points.endPoint }
+    }
+
+    var points: (startPoint: CGPoint, endPoint: CGPoint) {
+        get {
+            switch self {
+            case .topRightBottomLeft:
+                return (CGPoint(x: 1.0, y: 0.0), CGPoint(x: 0.0, y: 1.0))
+            case .topLeftBottomRight:
+                return (CGPoint(x: 0.0, y: 0.0), CGPoint(x: 1.0, y: 1.0))
+            case .bottomRightTopLeft:
+                return (CGPoint(x: 1.0, y: 1.0), CGPoint(x: 0.0, y: 0.0))
+            case .bottomLeftTopRight:
+                return (CGPoint(x: 0.0, y: 1.0), CGPoint(x: 1.0, y: 0.0))
+            case .horizontal:
+                return (CGPoint(x: 0.0, y: 0.5), CGPoint(x: 1.0, y: 0.5))
+            case .verticalUp:
+                return (CGPoint(x: 0.0, y: 1.0), CGPoint(x: 0.0, y: 0.0))
+            case .verticalDown:
+                return (CGPoint(x: 0.0, y: 0.0), CGPoint(x: 0.0, y: 1.0))
+            }
+        }
     }
 }
 
