@@ -247,7 +247,7 @@ import UIKit
 
     // MARK: - private stored properties
 
-    private enum HandleTracking { case none, left, right }
+    private enum HandleTracking { case down, left, right, up, none }
     private var handleTracking: HandleTracking = .none
 
     private let sliderLine: CAGradientLayer = CAGradientLayer()
@@ -366,7 +366,7 @@ import UIKit
             } else {
                 selectedMaxValue = max(selectedValue, selectedMinValue)
             }
-        case .none:
+        default:
             // no need to refresh the view because it is done as a side-effect of setting the property
             break
         }
@@ -379,7 +379,9 @@ import UIKit
     open override func endTracking(_ touch: UITouch?, with event: UIEvent?) {
         let handle: CALayer = (handleTracking == .left) ? leftHandle : rightHandle
         animate(handle: handle, selected: false)
-        handleTracking = .none
+        handleTracking = .up
+		
+		finish()
 
         delegate?.didEndTouches(in: self)
     }
@@ -651,21 +653,26 @@ import UIKit
             maxLabel.frame.origin.x = frame.width - maxLabel.frame.width
         }
     }
+	
+	fileprivate func finish() {
+		if enableStep && step > 0.0 {
+			selectedMinValue = CGFloat(round(Float(selectedMinValue / step))) * step
+			if let previousStepMinValue = previousStepMinValue, previousStepMinValue != selectedMinValue {
+				TapticEngine.selection.feedback()
+			}
+			previousStepMinValue = selectedMinValue
+
+			selectedMaxValue = CGFloat(round(Float(selectedMaxValue / step))) * step
+			if let previousStepMaxValue = previousStepMaxValue, previousStepMaxValue != selectedMaxValue {
+				TapticEngine.selection.feedback()
+			}
+			previousStepMaxValue = selectedMaxValue
+		}
+
+		refresh()
+	}
 
     fileprivate func refresh() {
-        if enableStep && step > 0.0 {
-            selectedMinValue = CGFloat(roundf(Float(selectedMinValue / step))) * step
-            if let previousStepMinValue = previousStepMinValue, previousStepMinValue != selectedMinValue {
-                TapticEngine.selection.feedback()
-            }
-            previousStepMinValue = selectedMinValue
-
-            selectedMaxValue = CGFloat(roundf(Float(selectedMaxValue / step))) * step
-            if let previousStepMaxValue = previousStepMaxValue, previousStepMaxValue != selectedMaxValue {
-                TapticEngine.selection.feedback()
-            }
-            previousStepMaxValue = selectedMaxValue
-        }
 
         let diff: CGFloat = selectedMaxValue - selectedMinValue
 
@@ -675,7 +682,7 @@ import UIKit
                 selectedMinValue = selectedMaxValue - minDistance
             case .right:
                 selectedMaxValue = selectedMinValue + minDistance
-            case .none:
+            default:
                 break
             }
         } else if diff > maxDistance {
@@ -684,7 +691,7 @@ import UIKit
                 selectedMinValue = selectedMaxValue - maxDistance
             case .right:
                 selectedMaxValue = selectedMinValue + maxDistance
-            case .none:
+            default:
                 break
             }
         }
